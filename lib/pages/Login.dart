@@ -7,6 +7,22 @@ import '../DAO/test.dart';
 // import 'package:hello_flutter/service/http-service.dart';
 import 'package:http/http.dart' as http;
 
+
+Future<Album> fetchAlbum() async {
+  final response = await http
+      .get(Uri.parse('https://jsonplaceholder.typicode.com/albums/1'));
+
+  if (response.statusCode == 200) {
+    // If the server did return a 200 OK response,
+    // then parse the JSON.
+    return Album.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
+  } else {
+    // If the server did not return a 200 OK response,
+    // then throw an exception.
+    throw Exception('Failed to load album');
+  }
+}
+
 // StatefulWidget
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -17,10 +33,17 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  late Future<Album> futureAlbum;
 
   User user = User(username: "", password: "");
 
   // String _message = 'Welcome To Flutter';
+
+  @override
+  void initState() {
+    super.initState();
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -96,49 +119,17 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  // Future<http.Response> fetchAlbum() {
-  //   return http.get(Uri.parse('https://jsonplaceholder.typicode.com/albums/1'));
-  // }
-
-  Future<Album> fetchAlbum() async {
-    final response = await http
-        .get(Uri.parse('https://jsonplaceholder.typicode.com/albums/1'));
-
-    if (response.statusCode == 200) {
-      // If the server did return a 200 OK response,
-      // then parse the JSON.
-      return Album.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
-    } else {
-      // If the server did not return a 200 OK response,
-      // then throw an exception.
-      throw Exception('Failed to load album');
-    }
-  }
-
-
   // 点击登录
   void _onLogin() {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      fetchAlbum().then((value) => print(value));
+      futureAlbum = fetchAlbum();
 
-      // fetchAlbum().then((value) => {
-      //   print(value)
-
-      //   final userMap = jsonDecode(jsonString) as Map<String, dynamic>;
-      //   final user = Test1.fromJson(userMap);
-
-      //   // print('Howdy, ${user.name}!');
-      //   // print('We sent the verification link to ${user.email}.');
-
-
-      // });
-
-
-    }
-
-
+      futureAlbum.then((value) => {
+        print(value.title)
+        // user.username = '9999'
+      });
 
       // HttpHelper.post(
       //   '/login',
