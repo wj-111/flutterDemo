@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import '../model/user.dart';
 import '../DAO/test.dart';
 
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 // import 'package:hello_flutter/service/http-service.dart';
 import 'package:http/http.dart' as http;
 
@@ -34,6 +37,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   late Future<Album> futureAlbum;
+  int _counter = 0;
 
   User user = User(username: "", password: "");
 
@@ -43,6 +47,16 @@ class _LoginPageState extends State<LoginPage> {
   void initState() {
     super.initState();
 
+  }
+
+  /// After a click, increment the counter state and
+  /// asynchronously save it to persistent storage.
+  Future<void> _incrementCounter() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _counter = (prefs.getInt('counter') ?? 0) + 1;
+      prefs.setInt('counter', _counter);
+    });
   }
 
   @override
