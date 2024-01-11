@@ -2,8 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'pages/Login.dart';
 // import 'pages/SecondPage.dart';
-import 'pages/ThirdPage.dart';
-
+import 'pages/Admin/AdminPage.dart';
 
 class AppTwo extends StatelessWidget {
   @override
@@ -19,7 +18,7 @@ class _HomeState extends State<Home> {
   int _currentIndex = 0;
   final List<Widget> _children = [
     // SecondPage(),
-    ThirdPage(),
+    AdminPage(),
     const LoginPage(),
   ];
 
@@ -41,11 +40,11 @@ class _HomeState extends State<Home> {
           //   label: 'add',
           // ),
           BottomNavigationBarItem(
-            icon: const Icon(Icons.list) ,
+            icon: const Icon(Icons.list),
             label: 'List',
           ),
           BottomNavigationBarItem(
-            icon: const Icon(Icons.message) ,
+            icon: const Icon(Icons.message),
             label: 'Message',
           )
         ],

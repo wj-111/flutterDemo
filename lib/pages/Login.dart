@@ -2,7 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import '../model/user.dart';
-import '../DAO/test.dart';
+import '../model/album.dart';
+import '../model/userquery.dart';
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,19 +11,19 @@ import 'package:shared_preferences/shared_preferences.dart';
 // import 'package:hello_flutter/service/http-service.dart';
 import 'package:http/http.dart' as http;
 
-
-Future<Album> fetchAlbum() async {
-  final response = await http
-      .get(Uri.parse('https://jsonplaceholder.typicode.com/albums/1'));
+Future<Album> createAlbum(UserQuery userQuery) async {
+  final response = await http.post(
+    Uri.parse('http://localhost:8080/mtsV2/user/login'),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode(userQuery.toJson()),
+  );
 
   if (response.statusCode == 200) {
-    // If the server did return a 200 OK response,
-    // then parse the JSON.
     return Album.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
   } else {
-    // If the server did not return a 200 OK response,
-    // then throw an exception.
-    throw Exception('Failed to load album');
+    throw Exception('Failed to create album.');
   }
 }
 
@@ -36,27 +37,12 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  late Future<Album> futureAlbum;
-  int _counter = 0;
 
   User user = User(username: "", password: "");
-
-  // String _message = 'Welcome To Flutter';
 
   @override
   void initState() {
     super.initState();
-
-  }
-
-  /// After a click, increment the counter state and
-  /// asynchronously save it to persistent storage.
-  Future<void> _incrementCounter() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _counter = (prefs.getInt('counter') ?? 0) + 1;
-      prefs.setInt('counter', _counter);
-    });
   }
 
   @override
@@ -138,22 +124,18 @@ class _LoginPageState extends State<LoginPage> {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      futureAlbum = fetchAlbum();
+      UserQuery userQuery = UserQuery(
+        phone: user.username,
+        password: user.password,
+      );
 
-      futureAlbum.then((value) => {
-        print(value.title)
-        // user.username = '9999'
+      createAlbum(userQuery).then((value) async {
+        // 这里可以根据返回的结果进行相应的处理
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setString('token', value.data);
+      }).catchError((error) {
+        _showMessage(error.toString());
       });
-
-      // HttpHelper.post(
-      //   '/login',
-      //   {
-      //     'username': user.username,
-      //     'password': user.password,
-      //   },
-      // )
-      //     .then((value) => Navigator.pushReplacementNamed(context, '/first'))
-      //     .catchError((error) => {_showMessage(error.message)});
     }
   }
 
