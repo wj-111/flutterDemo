@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'Admin/AdminPage.dart';
 import 'Reader/ReaderPage.dart';
-import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class SecondPage extends StatefulWidget {
   @override
@@ -39,15 +37,13 @@ class SecondPageState extends State<SecondPage> {
     } else {
       return Scaffold(
         appBar: AppBar(
-          title: Text("功能页，请先登录"),
+          title: const Text("功能页"),
         ),
-        body: Center(
+        body: const Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text("Token: $token"),
-              Text("Phone: $phone"),
-              Text("Role: $role"),
+              Text("功能页，请先登录"),
             ],
           ),
         ),

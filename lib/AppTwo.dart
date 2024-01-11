@@ -19,8 +19,6 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   int _currentIndex = 0;
   final List<Widget> _children = [
-    // ReaderPage(),
-    // AdminPage(),
     SecondPage(),
     LoginPage(),
   ];
@@ -28,27 +26,18 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-//      appBar: AppBar(
-//        title: Text("第二种方式"),
-//        centerTitle: true,
-//      ),
       body: _children[_currentIndex],
-//      CupertinoTabBar 是IOS分格
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: onTabTapped,
-        items: [
-          // BottomNavigationBarItem(
-          //   icon: const Icon(Icons.add) ,
-          //   label: 'add',
-          // ),
+        items: const [
           BottomNavigationBarItem(
-            icon: const Icon(Icons.list),
-            label: 'List',
+            icon: Icon(Icons.settings),
+            label: '功能',
           ),
           BottomNavigationBarItem(
-            icon: const Icon(Icons.message),
-            label: 'Message',
+            icon: Icon(Icons.person),
+            label: '用户',
           )
         ],
       ),

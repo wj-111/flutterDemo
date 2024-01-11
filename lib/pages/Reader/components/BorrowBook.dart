@@ -54,6 +54,15 @@ class _BorrowBookPageState extends State<BorrowBookPage> {
     }
   }
 
+  Future<void> handleResponse(BuildContext context) async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('借书成功'),
+        duration: Duration(seconds: 2), // 显示时长
+      ),
+    );
+  }
+
   Future<void> borrowBook(int bookId) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String userId = prefs.getString('id') ?? '';
@@ -66,9 +75,9 @@ class _BorrowBookPageState extends State<BorrowBookPage> {
 
       if (response.statusCode == 200) {
         Map<String, dynamic> responseData = jsonDecode(response.body);
-        if (responseData['code'] == 0) {
+        if (responseData['code'] == 200) {
           // 借阅成功
-          // TODO: 处理借阅成功的逻辑
+          handleResponse(context);
         } else {
           // 处理错误响应
           // TODO: 处理错误响应的逻辑
@@ -87,7 +96,7 @@ class _BorrowBookPageState extends State<BorrowBookPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Borrow Book2'),
+        title: Text('借书页'),
       ),
       body: ListView.builder(
         itemCount: bookList.length,
@@ -100,7 +109,7 @@ class _BorrowBookPageState extends State<BorrowBookPage> {
               onPressed: () {
                 borrowBook(book.id);
               },
-              child: Text('Borrow'),
+              child: Text('借书'),
             ),
           );
         },

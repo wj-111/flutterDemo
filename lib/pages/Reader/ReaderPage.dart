@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'components/BorrowBook.dart'; // 导入借书页面
+import 'components/ReturnBook.dart'; // 导入借书页面
 
 class ReaderPage extends StatefulWidget {
   @override
@@ -12,7 +13,7 @@ class ReaderPage extends StatefulWidget {
 }
 
 class _ReaderPageState extends State<ReaderPage> {
-  String username = 'John Doe'; // 用户名
+  String username = '未命名'; // 用户名
   String phone = ''; // 电话号码
   String id = ''; // 用户ID
 
@@ -25,7 +26,7 @@ class _ReaderPageState extends State<ReaderPage> {
   Future<void> loadUserInfo() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      username = prefs.getString('username') ?? 'John Doe';
+      username = prefs.getString('phone') ?? 'John Doe';
       phone = prefs.getString('phone') ?? '';
       id = prefs.getString('id') ?? '';
     });
@@ -39,21 +40,21 @@ class _ReaderPageState extends State<ReaderPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Update User Information'),
+          title: Text('修改用户信息'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: phoneController,
                 decoration: InputDecoration(
-                  labelText: 'Phone',
+                  labelText: '手机',
                 ),
               ),
               TextField(
                 controller: passwordController,
                 obscureText: true,
                 decoration: InputDecoration(
-                  labelText: 'Password',
+                  labelText: '密码',
                 ),
               ),
             ],
@@ -63,7 +64,7 @@ class _ReaderPageState extends State<ReaderPage> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('Cancel'),
+              child: Text('取消'),
             ),
             TextButton(
               onPressed: () {
@@ -72,15 +73,23 @@ class _ReaderPageState extends State<ReaderPage> {
                 String newPassword = passwordController.text;
 
                 // 调用接口更新用户信息
-                updateUserInformation(newPhone, newPassword);
-
-                Navigator.of(context).pop();
+                updateUserInformation(newPhone, newPassword)
+                    .then((value) => Navigator.of(context).pop());
               },
-              child: Text('Update'),
+              child: Text('确认'),
             ),
           ],
         );
       },
+    );
+  }
+
+  Future<void> handleResponse(BuildContext context) async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('操作成功'),
+        duration: Duration(seconds: 2), // 显示时长
+      ),
     );
   }
 
@@ -106,8 +115,7 @@ class _ReaderPageState extends State<ReaderPage> {
       );
 
       if (response.statusCode == 200) {
-        // 处理成功响应
-        // TODO: 处理成功响应的逻辑
+        handleResponse(context);
       } else {
         // 处理错误响应
         // TODO: 处理错误响应的逻辑
@@ -125,18 +133,25 @@ class _ReaderPageState extends State<ReaderPage> {
     );
   }
 
+  void navigateToReturnBookPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => ReturnBookPage()), // 跳转到归还书本页面
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Reader Page'),
+        title: Text('读者操作页'),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'Welcome, $username!', // 显示用户名
+              '欢迎你, 读者$username!', // 显示用户名
               style: TextStyle(fontSize: 24),
             ),
             SizedBox(height: 20),
@@ -144,14 +159,21 @@ class _ReaderPageState extends State<ReaderPage> {
               onPressed: () {
                 updateUser();
               },
-              child: Text('Update User Information'),
+              child: Text('修改用户信息'),
             ),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 navigateToBorrowBookPage(); // 跳转到借书页面
               },
-              child: Text('Borrow Book'),
+              child: Text('借书'),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                navigateToReturnBookPage(); // 跳转到归还书本页面
+              },
+              child: Text('还书'),
             ),
           ],
         ),

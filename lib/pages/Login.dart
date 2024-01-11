@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import './SecondPage.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -11,7 +12,36 @@ class LoginPage extends StatefulWidget {
 class _LoginState extends State<LoginPage> {
   TextEditingController _usernameController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
-  // 发现外面代码错了，会导致直接不更新，会影响判断
+  String token = '';
+  String phone = '';
+  String role = '';
+  String id = '';
+
+  @override
+  void initState() {
+    super.initState();
+    checkSavedData();
+  }
+
+  Future<void> checkSavedData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      token = prefs.getString('token') ?? '';
+      phone = prefs.getString('phone') ?? '';
+      role = prefs.getString('role') ?? '';
+      id = prefs.getString('id') ?? '';
+    });
+  }
+
+  Future<void> handleResponse(BuildContext context) async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('登录成功'),
+        duration: Duration(seconds: 2), // 显示时长
+      ),
+    );
+  }
+
   Future<void> login() async {
     final username = _usernameController.text;
     final password = _passwordController.text;
@@ -31,25 +61,26 @@ class _LoginState extends State<LoginPage> {
         final userData = jsonData['data'];
         final token = userData['token'];
 
-        // print(userData);
-        // print(token);
-
-        // 使用SharedPreferences保存用户信息
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('token', token);
         await prefs.setString('phone', userData['phone']);
         await prefs.setString('role', userData['role']);
         await prefs.setString('id', userData['id'].toString());
 
-        // // 跳转到主页
-        // Navigator.pushReplacementNamed(context, '/home');
+        setState(() {
+          this.token = token;
+          this.phone = userData['phone'];
+          this.role = userData['role'];
+          this.id = userData['id'].toString();
+        });
+
+        handleResponse(context);
       } else {
-        final message = jsonData['message'];
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: Text('Login Failed'),
-            content: Text(message),
+            title: Text('登录失败'),
+            content: Text('账户或者密码错误'),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
@@ -76,32 +107,63 @@ class _LoginState extends State<LoginPage> {
     }
   }
 
+  Future<void> logout() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    setState(() {
+      token = '';
+      phone = '';
+      role = '';
+      id = '';
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Login'),
+        title: Text('登录页'),
       ),
       body: Padding(
         padding: EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Username:'),
-            TextField(
-              controller: _usernameController,
-            ),
-            SizedBox(height: 20),
-            Text('Password:'),
-            TextField(
-              controller: _passwordController,
-              obscureText: true,
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: login,
-              child: Text('Login'),
-            ),
+            if (token.isNotEmpty) ...[
+              Flexible(
+                child: Text('Token: $token'),
+              ),
+              Flexible(
+                child: Text('Phone: $phone'),
+              ),
+              Flexible(
+                child: Text('Role: $role'),
+              ),
+              Flexible(
+                child: Text('ID: $id'),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: logout,
+                child: Text('退出登录'),
+              ),
+            ] else ...[
+              Text('用户名:'),
+              TextField(
+                controller: _usernameController,
+              ),
+              SizedBox(height: 20),
+              Text('密码:'),
+              TextField(
+                controller: _passwordController,
+                obscureText: true,
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: login,
+                child: Text('登录'),
+              ),
+            ],
           ],
         ),
       ),
