@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'pages/Login.dart';
 // import 'pages/SecondPage.dart';
 import 'pages/Admin/AdminPage.dart';
+import 'pages/Reader/ReaderPage.dart';
+import 'pages/SecondPage.dart';
 
 class AppTwo extends StatelessWidget {
   @override
@@ -17,9 +19,10 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   int _currentIndex = 0;
   final List<Widget> _children = [
-    // SecondPage(),
-    AdminPage(),
-    const LoginPage(),
+    // ReaderPage(),
+    // AdminPage(),
+    SecondPage(),
+    LoginPage(),
   ];
 
   @override

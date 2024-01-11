@@ -17,11 +17,15 @@ class AdminUserState extends State<AdminUser> {
   }
 
   Future<void> fetchUserList() async {
-    final response = await http.get(Uri.parse(
-        'http://localhost:8080/mtsV2/user/getUserList?page=1&pageCount=100'));
+    final response = await http.get(
+      Uri.parse(
+          'http://localhost:8080/mtsV2/user/getUserList?page=1&pageCount=100'),
+      headers: {'Accept-Charset': 'utf-8'},
+    );
 
     if (response.statusCode == 200) {
-      final jsonData = jsonDecode(response.body);
+      // 以为设置了上面的请求头就可以保持中文了，结果发现这里还要转化一下
+      final jsonData = jsonDecode(utf8.decode(response.bodyBytes));
       if (jsonData['code'] == 200) {
         setState(() {
           userList = List<Map<String, dynamic>>.from(jsonData['data']);
@@ -55,9 +59,7 @@ class AdminUserState extends State<AdminUser> {
                     icon: Icon(Icons.delete),
                     onPressed: () {
                       // 删除用户
-                      setState(() {
-                        userList.removeAt(index);
-                      });
+                      _deleteUser(user['id']);
                     },
                   ),
                   onTap: () {
@@ -219,6 +221,31 @@ class AdminUserState extends State<AdminUser> {
       } else {
         // 处理请求失败的情况
         print('更新用户信息失败：${jsonData['message']}');
+      }
+    } else {
+      // 处理网络请求失败的情况
+      print('网络请求失败：${response.statusCode}');
+    }
+  }
+
+  // 删除用户
+  Future<void> _deleteUser(int id) async {
+    final response = await http.post(
+      Uri.parse('http://localhost:8080/mtsV2/user/deleteUser'),
+      body: jsonEncode({
+        'id': id,
+      }),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      final jsonData = jsonDecode(response.body);
+      if (jsonData['code'] == 0) {
+        // 删除用户成功
+        await fetchUserList(); // 刷新用户列表
+      } else {
+        // 处理请求失败的情况
+        print('删除用户失败：${jsonData['message']}');
       }
     } else {
       // 处理网络请求失败的情况
